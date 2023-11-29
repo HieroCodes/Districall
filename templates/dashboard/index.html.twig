@@ -1,0 +1,48 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="dashboard">
+    <h1>Tableau de Bord</h1>
+    <p>Bienvenue sur votre tableau de bord.</p>
+     {% if app.user %}
+
+        <div class="mb-3">
+           Hello! &ensp;<strong> {{ app.user.userIdentifier }}</strong>
+        </div>
+
+        <br/><br/><br/><br/>
+        <div class="form-container">
+           {{ form_start(articleForm, {'attr': {'novalidate': 'novalidate'}, 'action': path('article_new')}) }}
+
+                <div class="row">   
+                    <div class="form-column">
+                        {{ form_row(articleForm.name) }}
+                        {{ form_row(articleForm.content) }}
+                    </div>
+                    
+                    <div class="form-column">
+                        {{ form_row(articleForm.description) }}
+                        <div class="file-input-container">
+                            {{ form_widget(articleForm.image) }}
+                            <p>Cliquez ou déposez un fichier ici</p>
+                        </div>
+                    </div>
+                </div>
+             <br/><br/>
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success"> {{ message }} </div>
+                {% endfor %}
+                {{ form_end(articleForm) }}
+        </div>
+
+</div>
+
+
+    {% endif %}
+
+    {# Ici, vous pouvez ajouter des liens ou des formulaires pour la création d'articles, etc. #}
+</div>
+{% endblock %}

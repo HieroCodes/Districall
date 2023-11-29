@@ -23,7 +23,13 @@ class ArticleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $article->setCreatedAt(new \DateTimeImmutable());
+            // Obtenir l'utilisateur actuellement connecté
+             $user = $this->getUser();
+
+            // Associer l'utilisateur à l'article
+             $article->setUser($user);
 
             /** @var UploadedFile $imageFile */
             $imageFile = $form->get('image')->getData();
@@ -38,7 +44,7 @@ class ArticleController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                   
+                    // Gestion des erreurs de téléchargement
                 }
 
                 $article->setImage($newFilename);
@@ -47,12 +53,19 @@ class ArticleController extends AbstractController
             $entityManager->persist($article);
             $entityManager->flush();
 
-            return $this->redirectToRoute('article_show', ['id' => $article->getId()]);
+            // Dans ArticleController, après la sauvegarde de l'article
+            $entityManager->flush();
+
+            // Ajouter un message flash
+            $this->addFlash('success', 'L\'article a été créé avec succès.');
+
+            // Rediriger vers le tableau de bord
+            return $this->redirectToRoute('dashboard');
         }
 
-        return $this->render('article/new.html.twig', [
+        return $this->render('dashboard/index.html.twig', [
             'article' => $article,
-            'form' => $form->createView(),
+            'articleForm' => $form->createView(),
         ]);
     }
 

@@ -21,12 +21,16 @@ class RegistrationFormType extends AbstractType
             ->add('password', PasswordType::class)
             ->add('age', IntegerType::class)
             ->add('sex', ChoiceType::class, [
-                'Choisir' => [
+                'choices' => [
                     'Femme' => true,
                     'Homme' => false,
                 ],
             ])
-            ->add('register', SubmitType::class, ['label' => 'Inscription']);
+            
+            ->add('register', SubmitType::class, 
+            ['label' => 'Inscription',
+            'attr' => ['class' => 'btn-register']],
+        );
     }
 
     public function configureOptions(OptionsResolver $resolver): void

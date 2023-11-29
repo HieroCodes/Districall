@@ -17,7 +17,10 @@ class LoginFormType extends AbstractType
         $builder
             ->add('email', EmailType::class)
             ->add('password', PasswordType::class)
-            ->add('login', SubmitType::class, ['label' => 'Connexion']);
+            ->add('login', SubmitType::class, 
+            ['label' => 'Connexion',
+            'attr' => ['class' => 'btn-register'],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

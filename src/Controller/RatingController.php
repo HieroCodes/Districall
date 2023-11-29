@@ -3,50 +3,68 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Form\RatingType;
 use App\Entity\Rating;
-use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ArticleRepository;
 
 class RatingController extends AbstractController
 {
     #[Route('/article/rate/{id}', name: 'article_rate', methods: ['POST'])]
-    public function rate(Article $article, Request $request, EntityManagerInterface $entityManager): Response
+    public function rate(Request $request, ArticleRepository $articleRepository, EntityManagerInterface $entityManager, $id): Response
     {
         $user = $this->getUser();
         if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour noter un article.');
             return $this->redirectToRoute('app_login');
         }
 
-        // 
-        $rateValue = $request->request->getInt('rate');
-        if ($rateValue < 0 || $rateValue > 10) {
-            // Handle the error appropriately
-            return $this->json(['message' => 'Note invalide'], Response::HTTP_BAD_REQUEST);
+        $article = $articleRepository->find($id);
+        if (!$article) {
+            $this->addFlash('error', 'Cet article n\'existe pas.');
+            return $this->redirectToRoute('home');
         }
 
-        // Verifions si l'utilisateur a déjà noté cet article
-        $existingRating = $entityManager->getRepository(Rating::class)->findOneBy([
-            'article' => $article,
-            'user' => $user,
-        ]);
+        $form = $this->createForm(RatingType::class);
+        $form->handleRequest($request);
 
-        if ($existingRating) {
-            //Permettre au User d'update sa note
-            return $this->json(['message' => 'Vous avez déjà noté cet article'], Response::HTTP_FORBIDDEN);
+        if ($form->isSubmitted() && $form->isValid()) {
+            dump($form->getData());
+            $rateValue = $form->get('rate')->getData();
+
+            // Rechercher une note existante
+            $existingRating = $entityManager->getRepository(Rating::class)->findOneBy([
+                'article' => $article,
+                'user' => $user,
+            ]);
+
+            if ($existingRating) {
+                $existingRating->setRate($rateValue);
+                $entityManager->flush();
+                $this->addFlash('success', 'Votre note a été mise à jour.');
+            } else {
+                // Créer une nouvelle note
+                $rating = new Rating();
+                $rating->setArticle($article);
+                $rating->setUser($user);
+                $rating->setRate($rateValue);
+
+                $entityManager->persist($rating);
+                $entityManager->flush();
+                $this->addFlash('success', 'Votre note a été enregistrée.');
+            }
+            
+            return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('home'));
         }
 
-        $rating = new Rating();
-        $rating->setArticle($article);
-        $rating->setUser($user);
-        $rating->setRate($rateValue);
-
-        $entityManager->persist($rating);
-        $entityManager->flush();
-
-        return $this->json(['message' => 'Merci d\'avoir noté cet article']);
+        // Gérer les erreurs de formulaire
+        foreach ($form->getErrors(true) as $error) {
+            $this->addFlash('error', $error->getMessage());
+        }
+        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('home'));
     }
 }

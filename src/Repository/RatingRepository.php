@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Article;
 use App\Entity\Rating;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -45,4 +46,18 @@ class RatingRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    // Dans RatingRepository.php
+public function getAverageRating(Article $article): ?float
+{
+    $result = $this->createQueryBuilder('r')
+        ->select('AVG(r.rate) as averageRating')
+        ->where('r.article = :article')
+        ->setParameter('article', $article)
+        ->getQuery()
+        ->getSingleScalarResult();
+
+    return $result ? (float) $result : null;
+}
+
 }

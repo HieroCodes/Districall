@@ -1,0 +1,29 @@
+
+<nav class="navbar" style="background-color: #54354a;">
+    <div class="navbar-start">
+        <ul>
+            <li><a href="{{ path('home') }}">Accueil</a></li>
+        
+            <li><a href="/">Contact</a></li>
+          
+        </ul>
+    </div>
+
+    <div class="navbar-center">
+        <a href="{{ path('home') }}">
+            <img src="{{ asset('images/districall.svg') }}" alt="Logo" class="navbar-logo">
+        </a>
+    </div>
+
+    <div class="navbar-end">
+        <ul>
+            {% if app.user %}
+                <li><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+            {% else %}
+                <li><a href="{{ path('app_login') }}">Connexion</a></li>
+                <li><a href="{{ path('app_register') }}">Inscription</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

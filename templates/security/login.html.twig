@@ -1,14 +1,32 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block body %}
-<h1>Login</h1>
+<div class="login-card">
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
 
-{{ form_start(loginForm) }}
-    {{ form_row(loginForm.email) }}
-    {{ form_row(loginForm.password) }}
+    {% if app.user %}
+        <div class="mb-3">
+           Hello!{{ app.user.userIdentifier }},Bienvenue | <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
+    {% endif %}
 
-    <button type="submit">Login</button>
-{{ form_end(loginForm) }}
+    <h1 class="h3 mb-3 font-weight-normal">Connexion</h1>
+    <form method="post" class="form-signin">
+        <label for="inputEmail" class="sr-only">Email</label>
+        <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        {% for message in app.flashes('error') %}
+        <div class="alert alert-danger"> {{ message }} </div>
+        {% endfor %}
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <div class="form-group">  {{ form_row(loginForm.login) }} </div>
+
+    </form>
+</div>
 {% endblock %}

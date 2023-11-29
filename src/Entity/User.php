@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
 
 #[ORM\Entity]
 #[UniqueEntity(fields: ['email'], message: 'Un compte existe déjà avec cet email')]
-class User implements UserInterface
+class User implements UserInterface,PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -85,9 +87,9 @@ class User implements UserInterface
     }
 
     // UserInterface
-    public function getRoles()
+    public function getRoles(): array
     {
-       
+        return ['ROLE_USER'];
     }
 
     public function getSalt()
@@ -105,3 +107,6 @@ class User implements UserInterface
         
     }
 }
+
+
+
